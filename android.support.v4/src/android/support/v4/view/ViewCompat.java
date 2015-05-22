@@ -305,6 +305,7 @@ public class ViewCompat {
         public void setLayoutDirection(View view, int layoutDirection);
         public ViewParent getParentForAccessibility(View view);
         public boolean isOpaque(View view);
+        public int combineMeasuredStates(int curState, int newState);
         public int resolveSizeAndState(int size, int measureSpec, int childMeasuredState);
         public int getMeasuredWidthAndState(View view);
         public int getMeasuredHeightAndState(View view);
@@ -495,6 +496,11 @@ public class ViewCompat {
                 return bg.getOpacity() == PixelFormat.OPAQUE;
             }
             return false;
+        }
+        
+        public int combineMeasuredStates(int curState, int newState)
+        {
+        	return curState | newState;
         }
 
         public int resolveSizeAndState(int size, int measureSpec, int childMeasuredState) {
@@ -975,6 +981,11 @@ public class ViewCompat {
             setLayerType(view, getLayerType(view), paint);
             // This is expensive, but the only way to accomplish this before JB-MR1.
             view.invalidate();
+        }
+        @Override
+        public int combineMeasuredStates(int curState, int newState)
+        {
+        	return ViewCompatHC.combineMeasuredStates(curState, newState);
         }
         @Override
         public int resolveSizeAndState(int size, int measureSpec, int childMeasuredState) {
@@ -1504,6 +1515,18 @@ public class ViewCompat {
      */
     public static boolean canScrollVertically(View v, int direction) {
         return IMPL.canScrollVertically(v, direction);
+    }
+    
+    /**
+     * Merge two states as returned by {@link #getMeasuredState()}.
+     * @param curState The current state as returned from a view or the result
+     * of combining multiple views.
+     * @param newState The new view state to combine.
+     * @return Returns a new integer reflecting the combination of the two
+     * states.
+     */
+    public static int combineMeasuredStates(int curState, int newState) {
+        return IMPL.combineMeasuredStates(curState, newState);
     }
 
     /**

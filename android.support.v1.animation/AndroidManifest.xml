@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="android.support.v1.animation"
+    android:versionCode="60"
+    android:versionName="2.4.0" >
+
+    <uses-sdk android:minSdkVersion="1" />
+
+</manifest>

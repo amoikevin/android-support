@@ -392,6 +392,19 @@ public class ViewDragHelper {
     }
 
     /**
+     * Sets the sensitivity of the dragger.
+     *
+     * @param context     The application context.
+     * @param sensitivity value between 0 and 1, the final value for touchSlop =
+     *                    ViewConfiguration.getScaledTouchSlop * (1 / s);
+     */
+    public void setSensitivity(Context context, float sensitivity) {
+        float s = Math.max(0f, Math.min(1.0f, sensitivity));
+        ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
+        mTouchSlop = (int) (viewConfiguration.getScaledTouchSlop() * (1 / s));
+    }
+
+    /**
      * Set the minimum velocity that will be detected as having a magnitude greater than zero
      * in pixels per second. Callback methods accepting a velocity will be clamped appropriately.
      *
@@ -399,6 +412,17 @@ public class ViewDragHelper {
      */
     public void setMinVelocity(float minVel) {
         mMinVelocity = minVel;
+    }
+
+    /**
+     * Set the max velocity that will be detected as having a magnitude
+     * greater than zero in pixels per second. Callback methods accepting a
+     * velocity will be clamped appropriately.
+     *
+     * @param maxVel max velocity to detect
+     */
+    public void setMaxVelocity(float maxVel) {
+        mMaxVelocity = maxVel;
     }
 
     /**
@@ -446,6 +470,17 @@ public class ViewDragHelper {
      */
     public int getEdgeSize() {
         return mEdgeSize;
+    }
+	
+	/**
+     * Set the size of an edge. This is the range in pixels along the edges of
+     * this view that will actively detect edge touches or drags if edge
+     * tracking is enabled.
+     *
+     * @param size The size of an edge in pixels
+     */
+    public void setEdgeSize(int size) {
+        mEdgeSize = size;
     }
 
     /**

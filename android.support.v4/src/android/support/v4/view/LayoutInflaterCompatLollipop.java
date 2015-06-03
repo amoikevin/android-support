@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package android.support.v4.app;
 
-import android.app.Notification;
+package android.support.v4.view;
 
-/**
- * Interface implemented by notification compat builders that support
- * an accessor for {@link Notification.Builder}. {@link Notification.Builder}
- * was introduced in HoneyComb.
- *
- * @hide
- */
-public interface NotificationBuilderWithBuilderAccessor {
-    public Notification.Builder getBuilder();
-    public Notification build();
+import android.view.LayoutInflater;
+
+class LayoutInflaterCompatLollipop {
+    static void setFactory(LayoutInflater inflater, LayoutInflaterFactory factory) {
+        inflater.setFactory2(factory != null
+                ? new LayoutInflaterCompatHC.FactoryWrapperHC(factory) : null);
+    }
 }

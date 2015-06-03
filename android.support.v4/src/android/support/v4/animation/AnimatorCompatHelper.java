@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
-package android.support.v4.app;
+package android.support.v4.animation;
 
-import android.app.Notification;
+import android.os.Build;
 
-/**
- * Interface implemented by notification compat builders that support
- * an accessor for {@link Notification.Builder}. {@link Notification.Builder}
- * was introduced in HoneyComb.
- *
- * @hide
- */
-public interface NotificationBuilderWithBuilderAccessor {
-    public Notification.Builder getBuilder();
-    public Notification build();
+abstract public class AnimatorCompatHelper {
+
+    static AnimatorProvider IMPL;
+
+    static {
+        if (Build.VERSION.SDK_INT >= 12) {
+            IMPL = new HoneycombMr1AnimatorCompatProvider();
+        } else {
+            IMPL = new DonutAnimatorCompatProvider();
+        }
+    }
+
+    public static ValueAnimatorCompat emptyValueAnimator() {
+        return IMPL.emptyValueAnimator();
+    }
+
+    AnimatorCompatHelper() {
+
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package android.support.v4.app;
-
-import android.app.Notification;
+package android.support.v4.animation;
 
 /**
- * Interface implemented by notification compat builders that support
- * an accessor for {@link Notification.Builder}. {@link Notification.Builder}
- * was introduced in HoneyComb.
+ * A simple interface to do things in animation pulse.
+ * <p>
+ * Before Honeycomb, it uses a simple Handler to mimic animation callback.
+ * <p>
+ * This is only a minimal implementation which is why this class is hidden.
  *
  * @hide
  */
-public interface NotificationBuilderWithBuilderAccessor {
-    public Notification.Builder getBuilder();
-    public Notification build();
+interface AnimatorProvider {
+
+    /**
+     * Provides a simple ValueAnimator w/o any start or end values. It provides the same
+     * Animator callback interface.
+     */
+    ValueAnimatorCompat emptyValueAnimator();
 }

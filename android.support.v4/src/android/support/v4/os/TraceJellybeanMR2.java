@@ -1,12 +1,9 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
- *
+ * Copyright (C) 2015 The Android Open Source Project
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,18 +11,16 @@
  * limitations under the License.
  */
 
-package android.support.v4.app;
+package android.support.v4.os;
 
-import android.app.Notification;
+import android.os.Trace;
 
-/**
- * Interface implemented by notification compat builders that support
- * an accessor for {@link Notification.Builder}. {@link Notification.Builder}
- * was introduced in HoneyComb.
- *
- * @hide
- */
-public interface NotificationBuilderWithBuilderAccessor {
-    public Notification.Builder getBuilder();
-    public Notification build();
+class TraceJellybeanMR2 {
+    public static void beginSection(String section) {
+        Trace.beginSection(section);
+    }
+
+    public static void endSection() {
+        Trace.endSection();
+    }
 }

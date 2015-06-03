@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package android.support.v4.app;
+package android.support.v4.view.accessibility;
 
-import android.app.Notification;
+import android.view.accessibility.AccessibilityEvent;
 
-/**
- * Interface implemented by notification compat builders that support
- * an accessor for {@link Notification.Builder}. {@link Notification.Builder}
- * was introduced in HoneyComb.
- *
- * @hide
- */
-public interface NotificationBuilderWithBuilderAccessor {
-    public Notification.Builder getBuilder();
-    public Notification build();
+class AccessibilityEventCompatKitKat {
+    public static  void setContentChangeTypes(AccessibilityEvent event, int changeTypes) {
+        event.setContentChangeTypes(changeTypes);
+    }
+
+    public static int getContentChangeTypes(AccessibilityEvent event) {
+        return event.getContentChangeTypes();
+    }
 }

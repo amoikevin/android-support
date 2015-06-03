@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,28 @@
  * limitations under the License.
  */
 
-package android.support.v4.view;
+package android.support.v4.animation;
 
 import android.view.View;
 
 /**
- * KitKat-specific View API implementation.
+ * Compatibility implementation for {@link android.animation.Animator}.
+ *
+ * @hide
  */
-class ViewCompatKitKat {
-    public static int getAccessibilityLiveRegion(View view) {
-        return view.getAccessibilityLiveRegion();
-    }
+public interface ValueAnimatorCompat {
 
-    public static void setAccessibilityLiveRegion(View view, int mode) {
-        view.setAccessibilityLiveRegion(mode);
-    }
+    public void setTarget(View view);
 
-    public static boolean isLaidOut(View view) {
-        return view.isLaidOut();
-    }
+    public void addListener(AnimatorListenerCompat listener);
 
-    public static boolean isAttachedToWindow(View view) {
-        return view.isAttachedToWindow();
-    }
+    public void setDuration(long duration);
+
+    public void start();
+
+    public void cancel();
+
+    void addUpdateListener(AnimatorUpdateListenerCompat animatorUpdateListener);
+
+    public float getAnimatedFraction();
 }

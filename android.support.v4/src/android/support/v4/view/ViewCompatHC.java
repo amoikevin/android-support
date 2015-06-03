@@ -17,12 +17,9 @@
 package android.support.v4.view;
 
 import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
 import android.graphics.Paint;
-import android.os.Build;
 import android.view.View;
 
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 class ViewCompatHC {
     static long getFrameTime() {
         return ValueAnimator.getFrameDelay();
@@ -40,11 +37,6 @@ class ViewCompatHC {
         return view.getLayerType();
     }
 
-    public static int combineMeasuredStates(int curState, int newState)
-    {
-    	return View.combineMeasuredStates(curState, newState);
-    }
-    
     public static int resolveSizeAndState(int size, int measureSpec, int childMeasuredState) {
         return View.resolveSizeAndState(size, measureSpec, childMeasuredState);
     }
@@ -163,5 +155,9 @@ class ViewCompatHC {
 
     public static void setActivated(View view, boolean activated) {
         view.setActivated(activated);
+    }
+
+    public static int combineMeasuredStates(int curState, int newState) {
+        return View.combineMeasuredStates(curState, newState);
     }
 }

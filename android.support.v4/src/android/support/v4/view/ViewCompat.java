@@ -22,6 +22,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.IntDef;
@@ -52,7 +53,7 @@ public class ViewCompat {
 
 
     /** @hide */
-    @IntDef({OVER_SCROLL_ALWAYS, OVER_SCROLL_IF_CONTENT_SCROLLS, OVER_SCROLL_IF_CONTENT_SCROLLS})
+    @IntDef({OVER_SCROLL_ALWAYS, OVER_SCROLL_IF_CONTENT_SCROLLS, OVER_SCROLL_NEVER})
     @Retention(RetentionPolicy.SOURCE)
     private @interface OverScroll {}
 
@@ -305,7 +306,6 @@ public class ViewCompat {
         public void setLayoutDirection(View view, int layoutDirection);
         public ViewParent getParentForAccessibility(View view);
         public boolean isOpaque(View view);
-        public int combineMeasuredStates(int curState, int newState);
         public int resolveSizeAndState(int size, int measureSpec, int childMeasuredState);
         public int getMeasuredWidthAndState(View view);
         public int getMeasuredHeightAndState(View view);
@@ -377,6 +377,9 @@ public class ViewCompat {
         boolean dispatchNestedFling(View view, float velocityX, float velocityY, boolean consumed);
         boolean dispatchNestedPreFling(View view, float velocityX, float velocityY);
         boolean isLaidOut(View view);
+        int combineMeasuredStates(int curState, int newState);
+        public float getZ(View view);
+        public boolean isAttachedToWindow(View view);
     }
 
     static class BaseViewCompatImpl implements ViewCompatImpl {
@@ -496,11 +499,6 @@ public class ViewCompat {
                 return bg.getOpacity() == PixelFormat.OPAQUE;
             }
             return false;
-        }
-        
-        public int combineMeasuredStates(int curState, int newState)
-        {
-        	return curState | newState;
         }
 
         public int resolveSizeAndState(int size, int measureSpec, int childMeasuredState) {
@@ -640,12 +638,12 @@ public class ViewCompat {
 
         @Override
         public int getMinimumWidth(View view) {
-            return 0;
+            return ViewCompatBase.getMinimumWidth(view);
         }
 
         @Override
         public int getMinimumHeight(View view) {
-            return 0;
+            return ViewCompatBase.getMinimumHeight(view);
         }
 
         @Override
@@ -932,6 +930,21 @@ public class ViewCompat {
         public boolean isLaidOut(View view) {
             return ViewCompatBase.isLaidOut(view);
         }
+
+        @Override
+        public int combineMeasuredStates(int curState, int newState) {
+            return curState | newState;
+        }
+
+        @Override
+        public float getZ(View view) {
+            return getTranslationZ(view) + getElevation(view);
+        }
+
+        @Override
+        public boolean isAttachedToWindow(View view) {
+            return ViewCompatBase.isAttachedToWindow(view);
+        }
     }
 
     static class EclairMr1ViewCompatImpl extends BaseViewCompatImpl {
@@ -981,11 +994,6 @@ public class ViewCompat {
             setLayerType(view, getLayerType(view), paint);
             // This is expensive, but the only way to accomplish this before JB-MR1.
             view.invalidate();
-        }
-        @Override
-        public int combineMeasuredStates(int curState, int newState)
-        {
-        	return ViewCompatHC.combineMeasuredStates(curState, newState);
         }
         @Override
         public int resolveSizeAndState(int size, int measureSpec, int childMeasuredState) {
@@ -1115,6 +1123,11 @@ public class ViewCompat {
         @Override
         public void setActivated(View view, boolean activated) {
             ViewCompatHC.setActivated(view, activated);
+        }
+
+        @Override
+        public int combineMeasuredStates(int curState, int newState) {
+            return ViewCompatHC.combineMeasuredStates(curState, newState);
         }
     }
 
@@ -1342,6 +1355,11 @@ public class ViewCompat {
         public boolean isLaidOut(View view) {
             return ViewCompatKitKat.isLaidOut(view);
         }
+
+        @Override
+        public boolean isAttachedToWindow(View view) {
+            return ViewCompatKitKat.isAttachedToWindow(view);
+        }
     }
 
     static class LollipopViewCompatImpl extends KitKatViewCompatImpl {
@@ -1469,6 +1487,11 @@ public class ViewCompat {
         public WindowInsetsCompat dispatchApplyWindowInsets(View v, WindowInsetsCompat insets) {
             return ViewCompatLollipop.dispatchApplyWindowInsets(v, insets);
         }
+
+        @Override
+        public float getZ(View view) {
+            return ViewCompatLollipop.getZ(view);
+        }
     }
 
     static final ViewCompatImpl IMPL;
@@ -1515,18 +1538,6 @@ public class ViewCompat {
      */
     public static boolean canScrollVertically(View v, int direction) {
         return IMPL.canScrollVertically(v, direction);
-    }
-    
-    /**
-     * Merge two states as returned by {@link #getMeasuredState()}.
-     * @param curState The current state as returned from a view or the result
-     * of combining multiple views.
-     * @param newState The new view state to combine.
-     * @return Returns a new integer reflecting the combination of the two
-     * states.
-     */
-    public static int combineMeasuredStates(int curState, int newState) {
-        return IMPL.combineMeasuredStates(curState, newState);
     }
 
     /**
@@ -2107,6 +2118,18 @@ public class ViewCompat {
      */
     public static int getMeasuredState(View view) {
         return IMPL.getMeasuredState(view);
+    }
+
+    /**
+     * Merge two states as returned by {@link #getMeasuredState(View)}.
+     * @param curState The current state as returned from a view or the result
+     * of combining multiple views.
+     * @param newState The new view state to combine.
+     * @return Returns a new integer reflecting the combination of the two
+     * states.
+     */
+    public static int combineMeasuredStates(int curState, int newState) {
+        return IMPL.combineMeasuredStates(curState, newState);
     }
 
     /**
@@ -2936,5 +2959,50 @@ public class ViewCompat {
      */
     public static boolean isLaidOut(View view) {
         return IMPL.isLaidOut(view);
+    }
+
+    /**
+     * The visual z position of this view, in pixels. This is equivalent to the
+     * {@link #setTranslationZ(View, float) translationZ} property plus the current
+     * {@link #getElevation(View) elevation} property.
+     *
+     * @return The visual z position of this view, in pixels.
+     */
+    public static float getZ(View view) {
+        return IMPL.getZ(view);
+    }
+
+    /**
+     * Offset this view's vertical location by the specified number of pixels.
+     *
+     * @param offset the number of pixels to offset the view by
+     */
+    public static void offsetTopAndBottom(View view, int offset) {
+        view.offsetTopAndBottom(offset);
+
+        if (offset != 0 && Build.VERSION.SDK_INT < 11) {
+            // We need to manually invalidate pre-honeycomb
+            view.invalidate();
+        }
+    }
+    /**
+     * Offset this view's horizontal location by the specified amount of pixels.
+     *
+     * @param offset the number of pixels to offset the view by
+     */
+    public static void offsetLeftAndRight(View view, int offset) {
+        view.offsetLeftAndRight(offset);
+
+        if (offset != 0 && Build.VERSION.SDK_INT < 11) {
+            // We need to manually invalidate pre-honeycomb
+            view.invalidate();
+        }
+    }
+
+    /**
+     * Returns true if the provided view is currently attached to a window.
+     */
+    public static boolean isAttachedToWindow(View view) {
+        return IMPL.isAttachedToWindow(view);
     }
 }

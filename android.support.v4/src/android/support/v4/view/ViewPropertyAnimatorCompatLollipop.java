@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,22 @@ package android.support.v4.view;
 
 import android.view.View;
 
-/**
- * KitKat-specific View API implementation.
- */
-class ViewCompatKitKat {
-    public static int getAccessibilityLiveRegion(View view) {
-        return view.getAccessibilityLiveRegion();
+class ViewPropertyAnimatorCompatLollipop {
+
+    public static void translationZ(View view, float value) {
+        view.animate().translationZ(value);
     }
 
-    public static void setAccessibilityLiveRegion(View view, int mode) {
-        view.setAccessibilityLiveRegion(mode);
+    public static void translationZBy(View view, float value) {
+        view.animate().translationZBy(value);
     }
 
-    public static boolean isLaidOut(View view) {
-        return view.isLaidOut();
+    public static void z(View view, float value) {
+        view.animate().z(value);
     }
 
-    public static boolean isAttachedToWindow(View view) {
-        return view.isAttachedToWindow();
+    public static void zBy(View view, float value) {
+        view.animate().zBy(value);
     }
+
 }

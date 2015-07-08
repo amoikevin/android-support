@@ -48,6 +48,7 @@ public class RenderScript {
     static final boolean DEBUG  = false;
     @SuppressWarnings({"UnusedDeclaration", "deprecation"})
     static final boolean LOG_ENABLED = false;
+    static final int SUPPORT_LIB_API = 23;
 
     static private ArrayList<RenderScript> mProcessContextList = new ArrayList<RenderScript>();
     private boolean mIsProcessContext = false;
@@ -731,6 +732,11 @@ public class RenderScript {
     synchronized long nScriptIntrinsicCreate(int id, long eid, boolean mUseInc) {
         validate();
         if (mUseInc) {
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+                Log.e(LOG_TAG, "Incremental Intrinsics are not supported, please change targetSdkVersion to >= 21");
+                throw new RSRuntimeException("Incremental Intrinsics are not supported before Lollipop (API 21)");
+            }
+
             if (!mIncLoaded) {
                 try {
                     System.loadLibrary("RSSupport");
@@ -738,7 +744,7 @@ public class RenderScript {
                     Log.e(LOG_TAG, "Error loading RS Compat library for Incremental Intrinsic Support: " + e);
                     throw new RSRuntimeException("Error loading RS Compat library for Incremental Intrinsic Support: " + e);
                 }
-                if (!nIncLoadSO(sSdkVersion)) {
+                if (!nIncLoadSO(SUPPORT_LIB_API)) {
                     throw new RSRuntimeException("Error loading libRSSupport library for Incremental Intrinsic Support");
                 }
                 mIncLoaded = true;
@@ -874,6 +880,63 @@ public class RenderScript {
       rsnScriptGroup2Execute(mContext, groupID);
     }
 
+    native void rsnScriptIntrinsicBLAS_Single(long con, long incCon, long id, int func, int TransA,
+                                              int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                              float alpha, long A, long B, float beta, long C, int incX, int incY,
+                                              int KL, int KU, boolean mUseInc);
+    synchronized void nScriptIntrinsicBLAS_Single(long id, int func, int TransA,
+                                                  int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                                  float alpha, long A, long B, float beta, long C, int incX, int incY,
+                                                  int KL, int KU, boolean mUseInc) {
+        validate();
+        rsnScriptIntrinsicBLAS_Single(mContext, mIncCon, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alpha, A, B, beta, C, incX, incY, KL, KU, mUseInc);
+    }
+
+    native void rsnScriptIntrinsicBLAS_Double(long con, long incCon, long id, int func, int TransA,
+                                              int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                              double alpha, long A, long B, double beta, long C, int incX, int incY,
+                                              int KL, int KU, boolean mUseInc);
+    synchronized void nScriptIntrinsicBLAS_Double(long id, int func, int TransA,
+                                                  int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                                  double alpha, long A, long B, double beta, long C, int incX, int incY,
+                                                  int KL, int KU, boolean mUseInc) {
+        validate();
+        rsnScriptIntrinsicBLAS_Double(mContext, mIncCon, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alpha, A, B, beta, C, incX, incY, KL, KU, mUseInc);
+    }
+
+    native void rsnScriptIntrinsicBLAS_Complex(long con, long incCon, long id, int func, int TransA,
+                                               int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                               float alphaX, float alphaY, long A, long B, float betaX, float betaY, long C, int incX, int incY,
+                                               int KL, int KU, boolean mUseInc);
+    synchronized void nScriptIntrinsicBLAS_Complex(long id, int func, int TransA,
+                                                   int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                                   float alphaX, float alphaY, long A, long B, float betaX, float betaY, long C, int incX, int incY,
+                                                   int KL, int KU, boolean mUseInc) {
+        validate();
+        rsnScriptIntrinsicBLAS_Complex(mContext, mIncCon, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alphaX, alphaY, A, B, betaX, betaY, C, incX, incY, KL, KU, mUseInc);
+    }
+
+    native void rsnScriptIntrinsicBLAS_Z(long con, long incCon, long id, int func, int TransA,
+                                         int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                         double alphaX, double alphaY, long A, long B, double betaX, double betaY, long C, int incX, int incY,
+                                         int KL, int KU, boolean mUseInc);
+    synchronized void nScriptIntrinsicBLAS_Z(long id, int func, int TransA,
+                                             int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                             double alphaX, double alphaY, long A, long B, double betaX, double betaY, long C, int incX, int incY,
+                                             int KL, int KU, boolean mUseInc) {
+        validate();
+        rsnScriptIntrinsicBLAS_Z(mContext, mIncCon, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alphaX, alphaY, A, B, betaX, betaY, C, incX, incY, KL, KU, mUseInc);
+    }
+
+    native void rsnScriptIntrinsicBLAS_BNNM(long con, long incCon, long id, int M, int N, int K,
+                                             long A, int a_offset, long B, int b_offset, long C, int c_offset,
+                                             int c_mult_int, boolean mUseInc);
+    synchronized void nScriptIntrinsicBLAS_BNNM(long id, int M, int N, int K,
+                                             long A, int a_offset, long B, int b_offset, long C, int c_offset,
+                                             int c_mult_int, boolean mUseInc) {
+        validate();
+        rsnScriptIntrinsicBLAS_BNNM(mContext, mIncCon, id, M, N, K, A, a_offset, B, b_offset, C, c_offset, c_mult_int, mUseInc);
+    }
 
 // Additional Entry points For inc libRSSupport
 
@@ -1292,7 +1355,13 @@ public class RenderScript {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             useIOlib = true;
         }
-        if (!rs.nLoadSO(useNative, sdkVersion)) {
+
+        int dispatchAPI = sdkVersion;
+        if (sdkVersion < android.os.Build.VERSION.SDK_INT) {
+            // If the device API is higher than target API level, init dispatch table based on device API.
+            dispatchAPI = android.os.Build.VERSION.SDK_INT;
+        }
+        if (!rs.nLoadSO(useNative, dispatchAPI)) {
             if (useNative) {
                 android.util.Log.v(LOG_TAG, "Unable to load libRS.so, falling back to compat mode");
                 useNative = false;
@@ -1303,7 +1372,7 @@ public class RenderScript {
                 Log.e(LOG_TAG, "Error loading RS Compat library: " + e);
                 throw new RSRuntimeException("Error loading RS Compat library: " + e);
             }
-            if (!rs.nLoadSO(false, sdkVersion)) {
+            if (!rs.nLoadSO(false, dispatchAPI)) {
                 throw new RSRuntimeException("Error loading libRSSupport library");
             }
         }

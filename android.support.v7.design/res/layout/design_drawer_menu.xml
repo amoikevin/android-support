@@ -13,18 +13,12 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-
-<set xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <alpha android:fromAlpha="0.0"
-           android:toAlpha="1.0"/>
-
-    <scale android:fromXScale="0.0"
-           android:fromYScale="0.0"
-           android:toXScale="1.0"
-           android:toYScale="1.0"
-           android:pivotX="50%"
-           android:pivotY="50%"/>
-
-</set>
+-->
+<android.support.design.internal.NavigationMenuView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/drawer_padding_top_default"
+        android:clipToPadding="false"
+        android:divider="@null"
+        android:listSelector="?attr/selectableItemBackground"/>

@@ -21,7 +21,6 @@ import android.content.Context;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.VelocityTrackerCompat;
 import android.support.v4.view.ViewCompat;
-//import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -200,18 +199,6 @@ public class ViewDragHelper {
          * @param yvel Y velocity of the pointer as it left the screen in pixels per second.
          */
         public void onViewReleased(View releasedChild, float xvel, float yvel) {}
-
-        /**
-         * Called when the child view has been released with a fling.
-         *
-         * <p>Calling code may decide to fling or otherwise release the view to let it
-         * settle into place.</p>
-         *
-         * @param releasedChild The captured child view now being released
-         * @param xvel X velocity of the fling.
-         * @param yvel Y velocity of the fling.
-         */
-        public void onViewFling(View releasedChild, float xvel, float yvel) {}
 
         /**
          * Called when one of the subscribed edges in the parent view has been touched
@@ -405,19 +392,6 @@ public class ViewDragHelper {
     }
 
     /**
-     * Sets the sensitivity of the dragger.
-     *
-     * @param context     The application context.
-     * @param sensitivity value between 0 and 1, the final value for touchSlop =
-     *                    ViewConfiguration.getScaledTouchSlop * (1 / s);
-     */
-    public void setSensitivity(Context context, float sensitivity) {
-        float s = Math.max(0f, Math.min(1.0f, sensitivity));
-        ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
-        mTouchSlop = (int) (viewConfiguration.getScaledTouchSlop() * (1 / s));
-    }
-
-    /**
      * Set the minimum velocity that will be detected as having a magnitude greater than zero
      * in pixels per second. Callback methods accepting a velocity will be clamped appropriately.
      *
@@ -425,17 +399,6 @@ public class ViewDragHelper {
      */
     public void setMinVelocity(float minVel) {
         mMinVelocity = minVel;
-    }
-
-    /**
-     * Set the max velocity that will be detected as having a magnitude
-     * greater than zero in pixels per second. Callback methods accepting a
-     * velocity will be clamped appropriately.
-     *
-     * @param maxVel max velocity to detect
-     */
-    public void setMaxVelocity(float maxVel) {
-        mMaxVelocity = maxVel;
     }
 
     /**
@@ -483,17 +446,6 @@ public class ViewDragHelper {
      */
     public int getEdgeSize() {
         return mEdgeSize;
-    }
-	
-	/**
-     * Set the size of an edge. This is the range in pixels along the edges of
-     * this view that will actively detect edge touches or drags if edge
-     * tracking is enabled.
-     *
-     * @param size The size of an edge in pixels
-     */
-    public void setEdgeSize(int size) {
-        mEdgeSize = size;
     }
 
     /**
@@ -756,42 +708,6 @@ public class ViewDragHelper {
     }
 
     /**
-     * Settle the captured view based on standard free-moving fling behavior.
-     * The caller should invoke {@link #continueSettling(boolean)} on each subsequent frame
-     * to continue the motion until it returns false.
-     *
-     * @param minLeft Minimum X position for the view's left edge
-     * @param minTop Minimum Y position for the view's top edge
-     * @param maxLeft Maximum X position for the view's left edge
-     * @param maxTop Maximum Y position for the view's top edge
-     * @param yvel the Y velocity to fling with
-     */
-    public void flingCapturedView(int minLeft, int minTop, int maxLeft, int maxTop, int yvel) {
-        if (!mReleaseInProgress) {
-            throw new IllegalStateException("Cannot flingCapturedView outside of a call to " +
-                    "Callback#onViewReleased");
-        }
-        mScroller.abortAnimation();
-        mScroller.fling(mCapturedView.getLeft(), mCapturedView.getTop(), 0, yvel,
-                Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE);       
-
-        setDragState(STATE_SETTLING);
-    }
-
-    /**
-     * Predict how far a fling with {@param yvel} will cause the view to travel from stand still.
-     * @return predicted y offset
-     */
-    public int predictFlingYOffset(int yvel) {
-        mScroller.abortAnimation();
-        mScroller.fling(0, 0, 0, yvel, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE,
-                Integer.MAX_VALUE);
-        final int finalY = mScroller.getFinalY();
-        mScroller.abortAnimation();
-        return finalY;
-    }
-
-    /**
      * Move the captured settling view by the appropriate amount for the current time.
      * If <code>continueSettling</code> returns true, the caller should call it again
      * on the next frame to continue.
@@ -838,28 +754,6 @@ public class ViewDragHelper {
         }
 
         return mDragState == STATE_SETTLING;
-    }
-
-    public void processNestedFling(View target, int yvel) {
-        mCapturedView = target;
-        dispatchViewFling(0, yvel);
-    }
-
-    public int getVelocityMagnitude() {
-        // Use Math.abs() to ensure this always returns an absolute value, even if the
-        // ScrollerCompat implementation changes.
-        return (int) Math.abs(mScroller.getCurrVelocity());
-    }
-
-    private void dispatchViewFling(float xvel, float yvel) {
-        mReleaseInProgress = true;
-        mCallback.onViewFling(mCapturedView, xvel, yvel);
-        mReleaseInProgress = false;
-
-        if (mDragState == STATE_DRAGGING) {
-            // onViewReleased didn't call a method that would have changed this. Go idle.
-            setDragState(STATE_IDLE);
-        }
     }
 
     /**
@@ -1248,11 +1142,6 @@ public class ViewDragHelper {
             case MotionEvent.ACTION_MOVE: {
                 if (mDragState == STATE_DRAGGING) {
                     final int index = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
-                    if (index < 0) {
-//                        Log.e(TAG, "Pointer index for id " + mActivePointerId + " not found."
-//                                + " Skipping MotionEvent");
-                        return;
-                    }
                     final float x = MotionEventCompat.getX(ev, index);
                     final float y = MotionEventCompat.getY(ev, index);
                     final int idx = (int) (x - mLastMotionX[mActivePointerId]);
@@ -1590,55 +1479,4 @@ public class ViewDragHelper {
 
         return result;
     }
-
-    /**
-     * Prepares the {@link ViewDragHelper} for the beginning of a nested scroll.
-     *
-     * @param target The child view that is dispatching the nested scroll.
-     */
-    public void startNestedScroll(View target) {
-        if (mVelocityTracker == null) {
-            mVelocityTracker = VelocityTracker.obtain();
-        }
-        setDragState(STATE_DRAGGING);
-        mCapturedView = target;
-    }
-
-    /**
-     * Informs the {@link ViewDragHelper} that a nested scroll has ended.
-     *
-     * @param target The child view that is dispatching the nested scroll.
-     */
-    public void stopNestedScroll(View target) {
-        mCapturedView = target;
-        dispatchViewReleased(0, 0);
-    }
-
-    /**
-     * Update the {@link ViewDragHelper} with a new nested scrolling event.
-     *
-     * @param target The child view that is dispatching the nested scroll.
-     * @param dx The x distance scrolled on the child, in pixels.
-     * @param dy The y distance scroll on the child, in pixels.
-     * @param consumed An int array for the {@link ViewDragHelper} to report back the scroll
-     *         deltas that it consumed.
-     */
-    public void processNestedScroll(View target, int dx, int dy, int[] consumed) {
-        if (mCapturedView == null) {
-            // This is safe because consumed array is null when called from
-            // onNestedScroll, and pre-initialized to {0, 0} when called from
-            // onNestedPreScroll.
-            return;
-        }
-        final int targetX = mCapturedView.getLeft() + dx;
-        final int targetY = mCapturedView.getTop() + dy;
-        dragTo(targetX, targetY, dx, dy);
-        if (consumed != null) {
-            final int unconsumedX = targetX - mCapturedView.getLeft();
-            final int unconsumedY = targetY - mCapturedView.getTop();
-            consumed[0] = unconsumedX - dx;
-            consumed[1] = unconsumedY - dy;
-        }
-    }
-
 }
